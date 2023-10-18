@@ -6,6 +6,16 @@ public class User {
     String profile;
     String token;
 
+    String partnerID;
+
+    public String getPartnerID() {
+        return partnerID;
+    }
+
+    public void setPartnerID(String partnerID) {
+        this.partnerID = partnerID;
+    }
+
     public String getToken() {
         return token;
     }

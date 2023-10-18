@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
@@ -25,8 +26,11 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.horoftech.tuki.databinding.ActivityMainBinding;
 
 import java.util.HashMap;
@@ -69,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
             binding.loginbutton.setVisibility(View.GONE);
 
             binding.textinputlayout.setVisibility(View.VISIBLE);
+
+//            auth.signOut();
             // TODO: 10/18/2023
             //if already has a partner don't show
         }
@@ -125,8 +131,41 @@ public class MainActivity extends AppCompatActivity {
                 user.setName(firebaseUser.getDisplayName());
                 user.setProfile(firebaseUser.getPhotoUrl() == null?"null":firebaseUser.getPhotoUrl().toString());
                 user.setToken(FirebaseMessagingService.getToken(MainActivity.this));
-                map.put(firebaseUser.getUid(),user);
-                reference.setValue(map);
+                map.put(firebaseUser.getPhoneNumber() == null?firebaseUser.getEmail():firebaseUser.getPhoneNumber(),user);
+                reference.addListenerForSingleValueEvent(new ValueEventListener() {
+
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.hasChild(firebaseUser.getPhoneNumber() == null?firebaseUser.getEmail():firebaseUser.getPhoneNumber())){
+                            User user1 = snapshot.getValue(User.class);
+                            if(user1 == null){
+                                reference.setValue(map);
+                            }else {
+                                user1.setToken(FirebaseMessagingService.getToken(MainActivity.this));
+                                HashMap<String,User> userHashMap = new HashMap<>();
+                                userHashMap.put(firebaseUser.getPhoneNumber() == null?firebaseUser.getEmail():firebaseUser.getPhoneNumber(),user);
+                                reference.setValue(userHashMap);
+                            }
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        binding.loginbutton.setVisibility(View.GONE);
+
+
+                    }
+                });
+
             }
         });
 
