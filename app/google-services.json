@@ -1,0 +1,77 @@
+{
+  "project_info": {
+    "project_number": "278421451459",
+    "firebase_url": "https://videocallapp-c45dd-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "videocallapp-c45dd",
+    "storage_bucket": "videocallapp-c45dd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:278421451459:android:170820ea09cd79d18be876",
+        "android_client_info": {
+          "package_name": "com.horoftech.easyconnect"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "278421451459-kuehicjd59elm5ffkk56uafkcecgd5r1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.horoftech.easyconnect",
+            "certificate_hash": "e9df7737024c6ceb72a4e187410d1d02e5d12b46"
+          }
+        },
+        {
+          "client_id": "278421451459-g2n1cdjkdntusi710ovhmgdlbdudqvec.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAU0XdoVhFqQ_YSbZXh8wkFJIuNsNhjk3A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "278421451459-g2n1cdjkdntusi710ovhmgdlbdudqvec.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:278421451459:android:81b4b0a38113c93d8be876",
+        "android_client_info": {
+          "package_name": "com.horoftech.tuki"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "278421451459-g2n1cdjkdntusi710ovhmgdlbdudqvec.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAU0XdoVhFqQ_YSbZXh8wkFJIuNsNhjk3A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "278421451459-g2n1cdjkdntusi710ovhmgdlbdudqvec.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Tuki</string>
+    <string name="default_notification_channel_id">mynotificationchannelid\n</string>
+</resources>
