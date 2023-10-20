@@ -40,6 +40,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.horoftech.tuki.databinding.ActivityMainBinding;
 import com.horoftech.tuki.databinding.ShowProfileOfPartnerBinding;
 
+import org.json.JSONObject;
+
 import java.util.Objects;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
@@ -79,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
             binding.invisibleLayout.setVisibility(View.GONE);
         }else {
             binding.loginbutton.setVisibility(View.GONE);
+
             reference.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -93,12 +96,18 @@ public class MainActivity extends AppCompatActivity {
                     assert uid != null;
                     if(snapshot.hasChild(Utils.md5(uid))){
                         myData = snapshot.child(Utils.md5(uid)).getValue(User.class);
+                        Glide.with(MainActivity.this).load(myData.getProfile()).circleCrop().into(binding.myProfilePicture);
+
                         assert myData != null;
                         if(myData.getPartnerID() != null){
                             partnerData = snapshot.child(Utils.md5(myData.getPartnerID())).getValue(User.class);
                             binding.invisibleLayout.setVisibility(View.GONE);
+                            Glide.with(MainActivity.this).load(partnerData.getProfile()).circleCrop().into(binding.partnerProfilePicture);
+                            binding.invisibleLayout2.setVisibility(View.VISIBLE);
                         }else {
                             binding.invisibleLayout.setVisibility(View.VISIBLE);
+                            binding.lovepie.setVisibility(View.GONE);
+                            binding.partnerProfilePicture.setVisibility(View.GONE);
                         }
                     }
                 }
@@ -128,36 +137,47 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        binding.searchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String email = Objects.requireNonNull(binding.textinputlayout.getEditText()).getText().toString();
-                if(!email.isEmpty()){
-                    if(email.equals(myData.getId())){
-                        Toast.makeText(MainActivity.this, "Not found!", Toast.LENGTH_SHORT).show();
-                        return;
+        binding.sendMessageButton.setOnClickListener(v -> {
+            String s = Objects.requireNonNull(binding.textinputlayout2.getEditText()).getText().toString();
+            if(!s.isEmpty()){
+                try {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("data",s);
+                    SendNotification.sendNotification(partnerData.getToken(),jsonObject,MainActivity.this);
+                }catch (Exception e){
+                    //ignored
+                }
+
+            }
+        });
+
+        binding.searchButton.setOnClickListener(v -> {
+            String email = Objects.requireNonNull(binding.textinputlayout.getEditText()).getText().toString();
+            if(!email.isEmpty()){
+                if(email.equals(myData.getId())){
+                    Toast.makeText(MainActivity.this, "Not found!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+
+                showLoading();
+                reference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        dismissLoading();
+                        if(snapshot.hasChild(Utils.md5(email))){
+                            User user1 = snapshot.child(Utils.md5(email)).getValue(User.class);
+                            showCustomDialog(myData,user1);
+                        }else {
+                            showError("Error","User not found!");
+                        }
                     }
 
-
-                    showLoading();
-                    reference.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            dismissLoading();
-                            if(snapshot.hasChild(Utils.md5(email))){
-                                User user1 = snapshot.child(Utils.md5(email)).getValue(User.class);
-                                showCustomDialog(myData,user1);
-                            }else {
-                                showError("Error","User not found!");
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            dismissLoading();
-                        }
-                    });
-                }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        dismissLoading();
+                    }
+                });
             }
         });
 

@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 import androidx.annotation.NonNull;
@@ -25,11 +26,9 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage message) {
-        if (message.getNotification() != null) {
-            showNotification(
-                    message.getNotification().getTitle(),
-                    message.getNotification().getBody());
-        }
+
+        Log.e("message",message.getData().toString());
+        showNotification("title", message.getData().toString());
     }
 
     private RemoteViews getCustomDesign(String title, String message) {

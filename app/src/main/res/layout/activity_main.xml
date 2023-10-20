@@ -14,7 +14,25 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/pink_500"
+        android:animateLayoutChanges="true"
         tools:context=".MainActivity">
+
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/back"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:alpha="0.4"
+            android:scaleType="centerCrop"
+            app:layout_constraintTop_toBottomOf="@id/titletext"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_speed=".5"
+            app:lottie_rawRes="@raw/background" />
+
 
         <TextView
             android:id="@+id/titletext"
@@ -29,20 +47,102 @@
             app:layout_constraintTop_toTopOf="parent" />
 
 
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/iv_match"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:visibility="visible"
+            android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintDimensionRatio="1:1"
+
             app:layout_constraintTop_toBottomOf="@id/titletext"
-            app:lottie_autoPlay="true"
-            app:lottie_loop="true"
-            app:lottie_rawRes="@raw/first_animation" />
+            android:id="@+id/animationContainer">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:gravity="center"
+                android:layout_marginTop="@dimen/_16sdp"
+                android:orientation="horizontal">
+
+
+
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/lovepie"
+                    android:layout_width="match_parent"
+                    app:layout_constraintDimensionRatio="1:1"
+                    android:layout_height="0dp"
+
+                    android:layout_marginHorizontal="@dimen/_8sdp"
+                    app:layout_constraintStart_toEndOf="@id/myProfilePicture"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/partnerProfilePicture"
+                    android:visibility="visible"
+                    app:lottie_autoPlay="true"
+                    app:lottie_loop="true"
+                    app:lottie_rawRes="@raw/first_animation" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    app:layout_constraintDimensionRatio="1:1"
+                    android:layout_height="0dp"
+                    app:layout_constraintHorizontal_weight="1"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:layout_marginHorizontal="@dimen/_8sdp"
+                    android:layout_marginStart="@dimen/_16sdp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginEnd="@dimen/_16sdp"
+                    app:layout_constraintEnd_toStartOf="@id/partnerProfilePicture"
+                    android:background="@drawable/circle_shape"
+                    android:id="@+id/myProfilePicture"/>
+
+
+
+
+                <ImageView
+                    android:layout_width="0dp"
+                    app:layout_constraintDimensionRatio="1:1"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="@dimen/_16sdp"
+                    android:layout_marginEnd="@dimen/_16sdp"
+                    app:layout_constraintHorizontal_weight="1"
+                    android:layout_marginHorizontal="@dimen/_8sdp"
+                    app:layout_constraintStart_toEndOf="@id/myProfilePicture"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:background="@drawable/circle_shape"
+                    android:id="@+id/partnerProfilePicture"/>
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/iv_match"
+                android:layout_width="match_parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_height="0dp"
+                app:layout_constraintDimensionRatio="1:1"
+                android:visibility="gone"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                app:lottie_autoPlay="true"
+                app:lottie_loop="true"
+                app:lottie_rawRes="@raw/first_animation" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -53,7 +153,7 @@
             android:gravity="center"
             android:id="@+id/invisibleLayout"
             android:layout_margin="@dimen/_16sdp"
-            app:layout_constraintTop_toBottomOf="@id/iv_match"
+            app:layout_constraintTop_toBottomOf="@id/animationContainer"
             android:orientation="vertical">
 
             <com.google.android.material.textfield.TextInputLayout
@@ -89,9 +189,49 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_margin="@dimen/_16sdp"
-            app:layout_constraintTop_toBottomOf="@id/iv_match"
+            app:layout_constraintTop_toBottomOf="@id/animationContainer"
             android:text="Login"
             android:id="@+id/loginbutton"/>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="gone"
+            android:gravity="center"
+            android:id="@+id/invisibleLayout2"
+            android:layout_margin="@dimen/_16sdp"
+            app:layout_constraintTop_toBottomOf="@id/animationContainer"
+            android:orientation="vertical">
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/CustomTextInputLayout"
+                android:id="@+id/textinputlayout2">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/white"
+                    android:fontFamily="@font/aclonica"
+                    android:hint="Send a message." />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_16sdp"
+                android:text="Send"
+                android:id="@+id/sendMessageButton"/>
+
+
+        </LinearLayout>
 
 
 
