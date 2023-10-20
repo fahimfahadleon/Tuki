@@ -8,9 +8,10 @@
 
 
     <style name="CustomTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <item name="boxBackgroundColor">@color/white</item>
+        <item name="boxBackgroundColor">@color/transparent</item>
         <item name="boxStrokeColor">@color/white</item>
         <item name="hintTextColor">@color/white</item>
+
     </style>
 
 </resources>

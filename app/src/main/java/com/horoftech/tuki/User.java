@@ -47,4 +47,15 @@ public class User {
     public void setProfile(String profile) {
         this.profile = profile;
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "name='" + name + '\'' +
+                ", id='" + id + '\'' +
+                ", profile='" + profile + '\'' +
+                ", token='" + token + '\'' +
+                ", partnerID='" + partnerID + '\'' +
+                '}';
+    }
 }

@@ -44,25 +44,44 @@
             app:lottie_loop="true"
             app:lottie_rawRes="@raw/first_animation" />
 
-
-        <com.google.android.material.textfield.TextInputLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="@style/CustomTextInputLayout"
-            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="gone"
+            android:gravity="center"
+            android:id="@+id/invisibleLayout"
+            android:layout_margin="@dimen/_16sdp"
             app:layout_constraintTop_toBottomOf="@id/iv_match"
-            android:id="@+id/textinputlayout"
-            android:layout_margin="@dimen/_16sdp">
+            android:orientation="vertical">
 
-            <com.google.android.material.textfield.TextInputEditText
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/aclonica"
-                android:hint="Partnar Phone or email" />
+                style="@style/CustomTextInputLayout"
+                android:id="@+id/textinputlayout">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/white"
+                    android:fontFamily="@font/aclonica"
+                    android:hint="Partner Phone or email" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_16sdp"
+                android:text="Add"
+                android:id="@+id/searchButton"/>
+
+        </LinearLayout>
+
+
 
         <com.google.android.material.button.MaterialButton
             android:layout_width="wrap_content"

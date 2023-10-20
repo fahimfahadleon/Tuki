@@ -1,10 +1,15 @@
 package com.horoftech.tuki;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -16,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -32,8 +38,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.horoftech.tuki.databinding.ActivityMainBinding;
+import com.horoftech.tuki.databinding.ShowProfileOfPartnerBinding;
 
-import java.util.HashMap;
+import java.util.Objects;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
@@ -45,6 +52,9 @@ public class MainActivity extends AppCompatActivity {
     DatabaseReference reference;
     GoogleSignInClient client;
     FirebaseAuth  auth;
+
+    User myData;
+    User partnerData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,16 +73,42 @@ public class MainActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance();
         reference = database.getReference("users");
         binding.loginbutton.setOnClickListener(v -> someActivityResultLauncher.launch(client.getSignInIntent()));
-
-
         FirebaseUser user = auth.getCurrentUser();
         if(user == null){
             binding.loginbutton.setVisibility(View.VISIBLE);
-            binding.textinputlayout.setVisibility(View.GONE);
+            binding.invisibleLayout.setVisibility(View.GONE);
         }else {
             binding.loginbutton.setVisibility(View.GONE);
+            reference.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-            binding.textinputlayout.setVisibility(View.VISIBLE);
+                    String uid;
+                    if(user.getPhoneNumber() == null || user.getPhoneNumber().isEmpty()){
+                        uid = user.getEmail();
+                    }else {
+                        uid = user.getPhoneNumber();
+                    }
+
+                    assert uid != null;
+                    if(snapshot.hasChild(Utils.md5(uid))){
+                        myData = snapshot.child(Utils.md5(uid)).getValue(User.class);
+                        assert myData != null;
+                        if(myData.getPartnerID() != null){
+                            partnerData = snapshot.child(Utils.md5(myData.getPartnerID())).getValue(User.class);
+                            binding.invisibleLayout.setVisibility(View.GONE);
+                        }else {
+                            binding.invisibleLayout.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
 
 //            auth.signOut();
             // TODO: 10/18/2023
@@ -92,11 +128,137 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
+        binding.searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String email = Objects.requireNonNull(binding.textinputlayout.getEditText()).getText().toString();
+                if(!email.isEmpty()){
+                    if(email.equals(myData.getId())){
+                        Toast.makeText(MainActivity.this, "Not found!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+
+                    showLoading();
+                    reference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            dismissLoading();
+                            if(snapshot.hasChild(Utils.md5(email))){
+                                User user1 = snapshot.child(Utils.md5(email)).getValue(User.class);
+                                showCustomDialog(myData,user1);
+                            }else {
+                                showError("Error","User not found!");
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            dismissLoading();
+                        }
+                    });
+                }
+            }
+        });
 
 
 
     }
 
+    AlertDialog dialog;
+    void showCustomDialog(User myData,User partnerData){
+        runOnUiThread(() -> {
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            ShowProfileOfPartnerBinding showProfileBinding = ShowProfileOfPartnerBinding.inflate(getLayoutInflater());
+            Glide.with(MainActivity.this).load(myData.getProfile()).circleCrop().into(showProfileBinding.firstHeart);
+            Glide.with(MainActivity.this).load(partnerData.getProfile()).circleCrop().into(showProfileBinding.secondHeart);
+
+            showProfileBinding.pair.setOnClickListener(v -> {
+                showProfileBinding.pair.setVisibility(View.GONE);
+                reference.child(Utils.md5(myData.getId())).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        User user = snapshot.getValue(User.class);
+                        if(user!=null){
+                            user.setPartnerID(partnerData.getId());
+                            reference.child(Utils.md5(myData.getId())).setValue(user);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+                reference.child(Utils.md5(partnerData.getId())).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        User user = snapshot.getValue(User.class);
+                        if(user!=null){
+                            user.setPartnerID(myData.getId());
+                            reference.child(Utils.md5(partnerData.getId())).setValue(user);
+                            runOnUiThread(() -> {
+                                if(dialog!=null && dialog.isShowing()){
+                                    dialog.dismiss();
+                                    showSuccess("Successful","Pair with "+partnerData.getName()+" is successful.");
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            });
+
+            builder.setView(showProfileBinding.getRoot());
+            dialog = builder.create();
+            Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(android.graphics.Color.parseColor("#00000000")));
+            dialog.show();
+
+        });
+
+    }
+
+    SweetAlertDialog loadingDialog;
+    void showLoading(){
+        runOnUiThread(()->{
+            loadingDialog = new SweetAlertDialog(this,SweetAlertDialog.PROGRESS_TYPE);
+            loadingDialog.show();
+        });
+    }
+
+    void dismissLoading(){
+        runOnUiThread(() -> {
+            if(loadingDialog!=null && loadingDialog.isShowing()){
+                loadingDialog.dismiss();
+            }
+        });
+    }
+
+
+    void showError(String title,String content){
+        runOnUiThread(() -> {
+            new SweetAlertDialog(this,SweetAlertDialog.ERROR_TYPE)
+                    .setTitleText(title)
+                    .setContentText(content)
+                    .setCancelButton("Cancel", Dialog::dismiss)
+                    .show();
+        });
+    }
+
+
+    void showSuccess(String title,String content){
+        runOnUiThread(() -> {
+            SweetAlertDialog dialog1 =  new SweetAlertDialog(MainActivity.this,SweetAlertDialog.SUCCESS_TYPE);
+            dialog1.setTitleText(title).setContentText(content).show();
+            new Handler(Looper.getMainLooper()).postDelayed(dialog1::dismiss,4000);
+        });
+
+    }
 
 
     ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult(
@@ -115,38 +277,48 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
-
+    boolean isPreviouslyLoggedIn = false;
     void firebaseAuth(String token){
         AuthCredential credential = GoogleAuthProvider.getCredential(token,null);
         auth.signInWithCredential(credential).addOnCompleteListener(task -> {
             if(task.isComplete()){
                 FirebaseUser firebaseUser = auth.getCurrentUser();
                 if(firebaseUser == null){
-                    Toast.makeText(this, "Something went Wrong!", Toast.LENGTH_SHORT).show();
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Something went Wrong!", Toast.LENGTH_SHORT).show());
                     return;
                 }
-                HashMap<String,User> map = new HashMap<>();
+
                 User user = new User();
-                user.setId(firebaseUser.getPhoneNumber() == null?firebaseUser.getEmail():firebaseUser.getPhoneNumber());
+
+                String phoneNumber = firebaseUser.getPhoneNumber();
+                String uid;
+                if(phoneNumber == null || phoneNumber.isEmpty()){
+                    uid = firebaseUser.getEmail();
+                }else {
+                    uid = firebaseUser.getPhoneNumber();
+                }
+
+                assert uid != null;
+                Log.e("uid",uid);
+
+                user.setId(uid);
                 user.setName(firebaseUser.getDisplayName());
                 user.setProfile(firebaseUser.getPhotoUrl() == null?"null":firebaseUser.getPhotoUrl().toString());
                 user.setToken(FirebaseMessagingService.getToken(MainActivity.this));
-                map.put(firebaseUser.getPhoneNumber() == null?firebaseUser.getEmail():firebaseUser.getPhoneNumber(),user);
                 reference.addListenerForSingleValueEvent(new ValueEventListener() {
 
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if(snapshot.hasChild(firebaseUser.getPhoneNumber() == null?firebaseUser.getEmail():firebaseUser.getPhoneNumber())){
+                        if(snapshot.hasChild(Utils.md5(uid))){
                             User user1 = snapshot.getValue(User.class);
-                            if(user1 == null){
-                                reference.setValue(map);
-                            }else {
-                                user1.setToken(FirebaseMessagingService.getToken(MainActivity.this));
-                                HashMap<String,User> userHashMap = new HashMap<>();
-                                userHashMap.put(firebaseUser.getPhoneNumber() == null?firebaseUser.getEmail():firebaseUser.getPhoneNumber(),user);
-                                reference.setValue(userHashMap);
-                            }
+                            assert user1 != null;
+                            isPreviouslyLoggedIn = user1.getPartnerID() != null;
 
+                            user1.setToken(FirebaseMessagingService.getToken(MainActivity.this));
+                            reference.child(Utils.md5(uid)).setValue(user1);
+
+                        }else {
+                            reference.child(Utils.md5(uid)).setValue(user);
                         }
                     }
 
@@ -157,15 +329,17 @@ public class MainActivity extends AppCompatActivity {
                 });
 
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        binding.loginbutton.setVisibility(View.GONE);
-
-
+                runOnUiThread(() -> {
+                    binding.loginbutton.setVisibility(View.GONE);
+                    if(!isPreviouslyLoggedIn){
+                        binding.invisibleLayout.setVisibility(View.VISIBLE);
+                    }else {
+                        binding.invisibleLayout.setVisibility(View.GONE);
                     }
                 });
 
+            }else {
+                Log.e("error","task not complete"+task.getResult().toString());
             }
         });
 

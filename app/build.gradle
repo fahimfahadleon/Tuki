@@ -4,6 +4,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        debug {
+            storeFile file('D:\\Project\\Tuki\\crt.jks')
+            storePassword '64742812'
+            keyAlias 'key0'
+            keyPassword '64742812'
+        }
+    }
     namespace 'com.horoftech.tuki'
     compileSdk 34
 
@@ -22,6 +30,12 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
+
+        }
+        debug {
+
+        signingConfig signingConfigs.debug
         }
     }
 
@@ -55,5 +69,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:20.7.0")
 
     implementation 'com.github.f0ris.sweetalert:library:1.6.2'
+
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
 
 }
